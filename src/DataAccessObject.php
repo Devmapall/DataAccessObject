@@ -64,9 +64,33 @@ class DataAccessObject {
         mysql_query($sql);
     }
     
-    public function read($id) {
+    public function readById($id) {
         $sql = "SELECT * FROM ".$this->table." WHERE ID = ".$id.";";
         $result = mysql_query($sql,$this->connection) OR die(mysql_error());
+        $obj = $this->buildObj($result);
+        echo $sql."<br>";
+        return $obj;
+    }
+    
+    public function readByAttributes($attributes) {
+        $sql = "SELECT * FROM ".$this->table." WHERE ";
+        foreach($attributes as $k=>$v) {
+            if(is_string($v)) {
+                if(preg_match("@\%(.*?)\%@",$v)) {
+                    $sql .= $k." like '".$v."' ";
+                } else {
+                    $sql .= $k." = '".$v."' ";
+                }
+            } else {
+                $sql .= $k." = ".$v." ";
+            }
+        }
+        $sql .= ";";
+        $result = mysql_query($sql);
+        return $this->buildObj($result);
+    }
+    
+    private function buildObj($result) {
         $row = mysql_fetch_assoc($result);
         $obj = new $this->table();
         if($obj instanceof IDAOClient) {
@@ -76,11 +100,8 @@ class DataAccessObject {
             }
             $obj->setID($id);
         }
-        
-        echo $sql."<br>";
         return $obj;
     }
-    
     public function update() {
         $sql = "UPDATE ".$this->table." SET ";
         $c = 1;
