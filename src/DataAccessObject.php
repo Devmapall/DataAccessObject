@@ -86,6 +86,7 @@ class DataAccessObject {
             }
         }
         $sql .= ";";
+        echo $sql."<br>";
         $result = mysql_query($sql);
         return $this->buildObj($result);
     }
@@ -98,7 +99,7 @@ class DataAccessObject {
                 $method = "set".$k;
                 $obj->$method($row[$k]);
             }
-            $obj->setID($id);
+            $obj->setID($row["ID"]);
         }
         return $obj;
     }

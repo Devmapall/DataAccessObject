@@ -11,8 +11,12 @@ $obj->setNr(1);
 $obj->setCreate_date(date("Y-m-d"));
 $dao->setObject($obj);
 //$dao->create();
-$obj2 = $dao->read(2);
-$obj2->setName("Lausberg");
-$dao->setObject($obj2);
-$dao->update();
+$attributes = array(
+    "Name" => "Lausberg",
+    "AND Nr" => 1
+);
+$obj2 = $dao->readByAttributes($attributes);
+var_dump($obj2);
+$obj2 = $dao->readById(2);
+var_dump($obj2);
 ?>
