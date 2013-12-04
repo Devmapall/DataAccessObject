@@ -20,8 +20,8 @@ class DataAccessObject {
     public function setObject(IDAOClient $object=null) {
         $this->object = $object;
         $data = $object->getDBVariables();
-        $this->table = $data["table"];
-        $this->values = $data["values"];
+        $this->table = get_class($object);
+        $this->values = $data;
     }
     
     public function create() {
@@ -61,19 +61,23 @@ class DataAccessObject {
         }
         $sql .= ";";
         echo $sql."<br>";
+        mysql_query($sql);
     }
     
-    public function read($table,$id) {
-        $sql = "SELECT * FROM ".$table." WHERE ID = ".$id.";";
-        $result = mysql_query($sql,$this->connection);
+    public function read($id) {
+        $sql = "SELECT * FROM ".$this->table." WHERE ID = ".$id.";";
+        $result = mysql_query($sql,$this->connection) OR die(mysql_error());
         $row = mysql_fetch_assoc($result);
-        $obj = new $table();
+        $obj = new $this->table();
         if($obj instanceof IDAOClient) {
             foreach($obj->getDBVariables() as $k=>$v) {
                 $method = "set".$k;
-                $obj->$method($row[0][$k]);
+                $obj->$method($row[$k]);
             }
+            $obj->setID($id);
         }
+        
+        echo $sql."<br>";
         return $obj;
     }
     
@@ -92,16 +96,19 @@ class DataAccessObject {
             if($c < count($this->values)) {
                 $sql .= ", ";
             }
+            $c++;
         }
         
         $sql .= "WHERE ID = ".$this->values["ID"].";";
         
-        echo $sql;
+        echo $sql."<br>";
+        mysql_query($sql) OR die(mysql_error());
     }
     
     public function delete() {
         $sql = "DELETE FROM ".$this->table." WHERE ID = ".$this->values["ID"].";";
-        echo $sql;
+        echo $sql."<br>";
+        mysql_query($sql);
     }
     
     private function endsWith($haystack, $needle)
