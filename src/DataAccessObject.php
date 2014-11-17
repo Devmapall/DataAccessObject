@@ -15,6 +15,7 @@ class DataAccessObject {
     
     public function __construct($connection) {
         $this->connection = $connection;
+        
     }
     
     public function setObject(IDAOClient $object=null) {
